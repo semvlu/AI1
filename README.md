@@ -1,3 +1,3 @@
 # AI1
 
-> Lab 1: Mazw Solver
+> Lab 1: Maze Solver
