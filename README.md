@@ -5,3 +5,5 @@
 > Lab 2: N queens & Nim
 
 > Lab 3: Constraint Satisfaction Problem (CSP)
+
+> Lab 4: Logic
