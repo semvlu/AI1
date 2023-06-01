@@ -88,6 +88,36 @@ class Clause:
 
         return False
 
+    def print_store(self):
+        string = ""
+        all_symbols = sorted(self.positive + self.negative)
+        duplicate = False
+
+        string += "["
+
+        if len(all_symbols) == 0:
+            string += "]=FALSE"
+
+        else:
+            for symbol in all_symbols[:-1]:
+                if not duplicate and symbol in self.negative:
+                    if symbol in self.positive:
+                        duplicate = True
+
+                    symbol = "~" + symbol
+                else:
+                    duplicate = False
+
+                string += symbol
+                string += ","
+
+            symbol = all_symbols[-1]
+            if not duplicate and symbol in self.negative:
+                symbol = "~" + symbol
+
+            string += symbol
+            string += "]"
+        return string
 
 def print_clause_set(clause_set):
     """
@@ -290,9 +320,9 @@ def recursive_print_proof(idx, clause_set, inferred):
     for i in clause_set: # append clauses in the original KB to OG
         add = True
         for j in inferred:
-            if i == j:
+            if i.equals(j):
                 add = False
-                continue
+                break
         if add == True:
             OG.append(i)
 
@@ -301,7 +331,7 @@ def recursive_print_proof(idx, clause_set, inferred):
             stack.append(i)
             break
     
-    tmp = stack.pop()
+    tmp = stack.pop() 
     positive = True
     if len(tmp.positive) == 0:
         positive = False
@@ -317,10 +347,12 @@ def recursive_print_proof(idx, clause_set, inferred):
                     if i.positive[0] == tmp.negative[0]:
                         stack.append(i)
 
-    printer.append("%d is inferred from %d and %d.")
-    entry = True
+
+    printer.append(clause_set[idx].print_store() + " is inferred from "+ tmp.print_store() + " and "+ stack[0].print_store() +".")
     
-    while entry == True or 
+    entry = True
+    end = False
+    while entry == True or end == False:
         tmp = stack.pop()
         positive = True
         if len(tmp.positive) == 0:
@@ -330,24 +362,30 @@ def recursive_print_proof(idx, clause_set, inferred):
             if positive == True:
                 for j in i.positive:
                     for k in tmp.positive:
-                        if j == k and i.equal(tmp) == False:
+                        if j == k and i.equals(tmp) == False:
                             stack.append(i)
-
+            else:
+                for j in i.negative:
+                    for k in tmp.negative:
+                        if j == k and i.equals(tmp) == False:
+                            stack.append(i)
+        
         find_conclusion = False
         while find_conclusion == False:
-            tmp_1 = stack.pop()
+            tmp_1 = stack[-1]
             for i in clause_set:
                 if can_resolve(tmp_1, i) and resolve_clauses(tmp_1, i).equals(tmp):
-                    if is_element_of_clause_set(tmp_1, OG) and is_element_of_clause_set(i, OG):
-
+                    if is_element_of_clause_set(tmp_1, OG) or is_element_of_clause_set(i, OG):
+                        find_conclusion = True
+                        if is_element_of_clause_set(tmp_1, OG) and is_element_of_clause_set(i, OG):
+                            end = True
+                        printer.append(tmp.print_store() + " is inferred from "+ tmp_1.print_store() + " and "+ i.print_store() +".")
                         break
-
-
-
-
-
-
+        
         entry = False
+    
+    for i in printer:
+        print(i)
 
     
 
