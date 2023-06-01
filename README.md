@@ -6,4 +6,4 @@
 
 > Lab 3: Constraint Satisfaction Problem (CSP)
 
-> Lab 4: Logic
+> Lab 4: Propositional Logic, Resolution & Prolog
