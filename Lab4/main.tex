@@ -1,0 +1,246 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=C,
+  numbers=left,
+  stepnumber=1,    
+  firstnumber=1,
+  numberfirstline=true
+  aboveskip=5mm,
+  belowskip=5mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+
+\title{{\bf Artificial Intelligence 1} \\ Lab 4}%Update the lab (assignment number)
+\author{
+Po-Chun Chi (S5494796)
+\\
+Merlijn Brouwer (S5248949)
+\\
+Learning Group 66
+} %Change the name and fill in the student number and your group
+\date{\today}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\section*{Disclosure}
+
+\paragraph{I have collaborated on the code with:} 
+\paragraph{To develop the code I (we) used the following resources:\\
+\url{https://stackoverflow.com/questions/60237583/python-iterate-over-all-possible-combinations-on-boolean-variables}\\
+\url{http://www.cs.trincoll.edu/~ram/cpsc352/notes/prolog/factsrules.html}\\
+\url{https://www.tutorialspoint.com/prolog/prolog_lists.htm}\\
+\url{https://stackoverflow.com/questions/67103585/check-if-list-is-the-reverse-of-the-other-list-in-prolog}}
+
+% disclose all online or offline resources you have consulted to develop your code
+
+\section*{Exercise 1}
+Model1:
+\\
+KB entails INFER.
+\\
+Model2:
+\\
+In model 2, the knowledge base does not entail the inferences. Our program found a counter example, where all identifiers are true. 
+\\
+Model3:
+\\
+KB entails INFER.
+\\
+\section*{Exercise 2}
+We added the following clauses to the KB: [a,b,$\sim$d,$\sim$e], [d], [$\sim$a] such that "false" can be inferred. Terminal when running "resolution.py":
+\subsubsection*{resolution.py}
+\begin{lstlisting}
+Proof:
+[a,b,c,~d] is inferred from [b,c,e] and [a,b,~d,~e].
+[a,b,~d] is inferred from [a,b,~c,~d] and [a,b,c,~d].
+[a,~d] is inferred from [a,~b] and [a,b,~d].
+[~d] is inferred from [~a] and [a,~d].
+[]=FALSE is inferred from [d] and [~d].
+\end{lstlisting}
+\section*{Exercise 3}
+3.1
+\\
+a)
+\begin{lstlisting} 
+grandfather(X, lot)
+\end{lstlisting}
+X = Terach.\\
+\\
+b)
+\begin{lstlisting} 
+grandfather(terach, X), male(X)
+\end{lstlisting}
+X = Isaac, X = Lot.\\
+\\
+3.2
+\\
+a)
+\begin{lstlisting} 
+plus(s(s(s(0))), s(s(0)), s(s(s(s(s(0))))))
+\end{lstlisting}
+true\\
+\\
+b)
+\begin{lstlisting} 
+plus(s(s(s(0))), s(s(0)), s(s(s(s(s(s(0)))))))
+\end{lstlisting}
+false\\
+\\
+c)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+even(0).
+even(s(s(N))):- even(N).
+    
+odd(s(0)).
+odd(s(s(N))) :- odd(N).
+\end{lstlisting}
+d)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+div2(0,0).
+div2(s(s(N)), s(D)) :- div2(N, D).
+\end{lstlisting}
+e)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+divi2(N, D) :- times(D, s(s(0)), N).
+\end{lstlisting}
+Testing 4/2 = 2:
+\begin{lstlisting} 
+divi2(s(s(s(s(0)))), s(s(0)))
+\end{lstlisting}
+true
+\\\\
+Testing 3/2 = 1:
+\begin{lstlisting} 
+divi2(s(s(s(0))), s(0))
+\end{lstlisting}
+false
+\\\\
+Testing 0/2 = 0:
+\begin{lstlisting} 
+divi2(0, 0)
+\end{lstlisting}
+true\\
+\\
+f)
+\begin{lstlisting} 
+pow(s(s(0)), N, s(s(s(s(s(s(s(s(0)))))))))
+\end{lstlisting}
+N = 3
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+log(X, B, N) :- pow(B, N, X).
+\end{lstlisting}
+g)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+fib(0,0).
+fib(s(0),s(0)).
+fib(s(s(X)),Y) :- fib(s(X),Y1),fib(X,Y2),plus(Y1,Y2,Y).
+\end{lstlisting}
+h)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+power(X,0,s(0)) :- isnumber(X).	
+power(X,s(N),Y):- odd(s(N)),times(X,X1,Y),power(X,N,X1).
+power(X,N,Y) :- even(N),power(X1,N1,Y),divi2(N,N1),times(X,X,X1).
+\end{lstlisting}
+This predicate is not necessarily more efficient than O(N) computation, because it has to perform additional steps to calculate whether the power is odd or even, and then perform computations accordingly. \\
+\\
+3.3
+\\
+a)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+member(X,[X|L]).
+member(X,[L|TAIL]) :- member(X,TAIL).
+\end{lstlisting}
+b)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+concat(L, X, Y) :- append(X, Y, L).
+\end{lstlisting}
+c)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+reverse([],[]).
+reverse([H|T],R) :- reverse(T,RT),append(RT,[H],R).
+\end{lstlisting}
+d)
+\subsubsection*{arith.pl}
+\begin{lstlisting} 
+palindrome(L) :- reverse(L, L)
+\end{lstlisting}
+3.4
+\\
+a)
+\subsubsection*{maze.pl}
+\begin{lstlisting} 
+link(a,b).
+link(b,f).
+link(c,d).
+link(c,g).
+link(d,h).
+link(e,f).
+link(f,j).
+link(g,k).
+link(h,l).
+link(i,m).
+link(j,k).
+link(l,p).
+link(m,n).
+link(n,o).
+
+link(b,a).
+link(f,b).
+link(d,c).
+link(g,c).
+link(h,d).
+link(f,e).
+link(j,f).
+link(k,g).
+link(l,h).
+link(m,i).
+link(k,j).
+link(p,l).
+link(n,m).
+link(o,n).
+\end{lstlisting}
+b)
+\subsubsection*{maze.pl}
+\begin{lstlisting} 
+path(X,Y) :- link(X,Y).
+path(X,Y) :- path(X,Z), link(Z,Y).
+\end{lstlisting}
+Test \emph{path(a,p)}: true.
+\\
+c)
+\\
+Test \emph{path(a,m)}: Time limit exceeded.
+\\
+\end{document}
