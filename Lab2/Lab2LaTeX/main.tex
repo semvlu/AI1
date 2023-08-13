@@ -1,0 +1,166 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=C,
+  numbers=left,
+  stepnumber=1,    
+  firstnumber=1,
+  numberfirstline=true
+  aboveskip=5mm,
+  belowskip=5mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+
+\title{{\bf Artificial Intelligence 1} \\ Lab 2}%Update the lab (assignment number)
+\author{
+Po-Chun Chi (S5494796)
+\\
+Merlijn Brouwer (S5248949)
+\\
+Learning Group 66
+} %Change the name and fill in the student number and your group
+\date{\today}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\section*{Disclosure}
+
+\paragraph{I have collaborated on the code with:} 
+\paragraph{To develop the code I (we) used the following resources:\\
+} % disclose all online or offline resources you have consulted to develop your code
+https://shorturl.at/fKNVX
+
+\section*{Exercise 1}
+1.1
+\\
+a)
+\\
+The algorithm does not usually find a solution.
+\\
+b)
+\\
+The algorithm fails to find a solution when the starting position sits on the slope of a "hill" whose top is a local maximum. This is because it only accepts moves that result in a higher evaluation. Once it reaches the local maximum, it won't make any more moves, even though the global optimum has not been reached.
+\\
+c)
+\\
+The improvement we added is side-stepping. Instead of only choosing options that result in a better evaluation, we now also accept moves that yield a board with the same number of conflicts. This way, we won't get stuck on plateaus in the evaluation curve. In order to implement this change, we modify the \emph{if} statement on line 165:
+\subsubsection*{nqueens.py}
+\begin{lstlisting}
+if boardMax > evaluate_state(board):
+\end{lstlisting}
+now becomes:
+\subsubsection*{nqueens.py}
+\begin{lstlisting}
+if boardMax >= evaluate_state(board):
+\end{lstlisting}
+d)
+\\
+Experiment Result (Y = solved, N = failed): \\
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+Experiment \textbackslash N & 4 & 8 & 16 & 32 & 64 \\ \hline
+1                           & Y & Y & Y  & Y  & Y  \\ \hline
+2                           & Y & Y & Y  & Y  & Y  \\ \hline
+3                           & Y & Y & Y  & Y  & Y  \\ \hline
+4                           & Y & Y & Y  & Y  & Y  \\ \hline
+5                           & Y & Y & Y  & Y  & Y  \\ \hline
+6                           & Y & Y & Y  & Y  & Y  \\ \hline
+7                           & Y & Y & Y  & Y  & Y  \\ \hline
+8                           & Y & Y & Y  & Y  & Y  \\ \hline
+9                           & Y & Y & Y  & Y  & Y  \\ \hline
+10                          & Y & Y & Y  & Y  & Y  \\ \hline
+\end{tabular}
+\end{center}
+As we can see in the table, the algorithm now finds a solution in every situation. This means that the starting position always happened to sit on the slope leading to the global maximum, this slope possibly featuring plateaus. 
+\\
+\\
+1.2
+\\
+a) 
+\\
+For our implementation of simulated annealing, we first choose a random column and remember the original position of the queen in that column, as well as the evaluation of the current situation. Using a \emph{for}-loop, we choose a random square in our selected column, which we make sure is not the original position of the queen. We move the queen to the randomly selected square and calculate $\Delta$E. We update the temperate to suit the current move. Our temperature is given by the function \textbf{time\_to\_temperature}, which lets T decrease linearly with time. Next, we evaluate the move we made to decide whether we accept it or not. As dictated by the principle of simulated annealing, the move is always accepted if it results in a position with less conflicts. If this is not the case, we accept the move with a probability of $ e^{\Delta E / T} $. 
+This is done with the function \textbf{random.choices()}. If the outcome is \textbf{False}, we discard the move and put the queen back on the original square. This process is repeated until a solution is found or the maximum number of iterations is reached.
+\\
+b) 
+\\
+We tried many options for our \textbf{time\_to\_temperature} function, including variations of fractional, linear and exponential equations. In the end we got the best results with the fractional equation $ T = 40000000/(time + 4000) - 400 $, which is optimized for a maximum of 100000 iterations. The plot for this function is shown in Figure \ref{fig:image}. The temperature has to stay positive in order for the probability formula to work. Since our function intersects the \emph{x}-axis at 96000 iterations, we included the \emph{if}-statement shown in lines 3-4 to make sure it will stay positive also after 96000 iterations.
+\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.2\textwidth]{figure1.png}
+		\caption{The temperature plotted against the number of iterations. The relation is described by the function $ T = 40000000/(time + 4000) - 400 $}
+		\label{fig:image}
+	\end{figure}
+\\
+c)
+\\
+The table below shows the success rates of the algorithm for different board sizes. For each board size, we ran the program 10 times, each run continuing for 100000 iterations. 
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+Board size & 4 & 8 & 16 & 32 & 64 \\ \hline
+Success rate & 100\% & 50\% & 0\% & 0\% & 0\%  \\ \hline
+
+\end{tabular}
+\end{center}
+d)
+\\
+If the temperature drops too quickly, the probability of choosing a move that yields a lower evaluation will not be high enough early on, so we're likelier get stuck in local maxima. We can show this by using a different temperature function: $ T = 100000/time $. The algorithm now has a success rate of 10\% for a 8x8 board. If it drops too slowly, there will be too many random moves throughout the process, and so the chance that we'll find moves that improve the position is small. to demonstrate this, let's define T with the linear function $T = 100000 - time$. For a 8x8 board, the success rate is now 30%.
+\\
+\\
+1.3
+\\
+a)
+\\
+Randomly set up 4 sequences of number as the initial population (chromosome) as the first step, then get the heuristics of each member in the population. During the selection process, choose 2 members out of 4 which they had the best and the second best heuristics. Cut the string in the propotion of 4:6, inspired from the golden ratio 1:1.618 ~= 4:6. Then there will be 2 "fertilised eggs" during the crossover process. Last but not least on the mutation part, if there're duplicated numbers, change one (some) of them. The rule is: randomly choose one (some) of them, turn it into a number which is not yet in the sequence, also it should not be its adjacent neighbours' increment / decrement.
+\\
+b)
+\\
+Although we didn't manage to create an operational implementation of the genetic algorithm, we can compare hill-climbing and simulated annealing. As shown in the tables, hill-climbing has a 100\% success rate for all tested board sizes, while simulated annealing only performs well for a 4x4 board. It finds a solution 50\% of the time for a 8x8 board and doesn't seem to work at all for a 16x16 board. To find out why this is, let's consider in which situations each algorithm finds a solution. Hill-climbing will find the global maximum if the starting position lies on the slope of the highest "peak". Simulated annealing finds a solution if its random moves lead it to slope of the highest peak and then climbs up to the global optimum. The reason it performs less well than hill-climbing is that the random moves aren't guaranteed to eventually lead it to the right "hill", and even if it does, the chance is high that it will make another random move somewhere along the way that will move it down again.
+\\
+\section*{Exercise 2}
+a)
+\\
+n=3: MAX \\
+n=4: MAX \\
+n=5: MIN \\
+n=6: MAX \\
+for n = 3: MAX chooses 2, then there's only 1 unit left for MIN, the utility value will be +1, which means MAX wins. \\
+for n = 4: MAX chooses 3, then there's also only 1 unit left for MIN,  the utility value will be +1, which means MAX wins. \\
+for n = 5: No matter how many MAX chooses, MIN can always left 1 unit for MAX, the utility value will be -1, which means MIN wins. \\
+for n = 6: For MAX, picking 3 or 2 units will result in his loss the very next turn: there be 3 or 4 units left respectively, which means MIN can win in the same turn by leaving one unit. So his only option is to pick 1 unit. In that case, there will be 5 units left when it's MIN's turn. Whatever MIN does in this situation, MAX will be able to leave 1 unit in the next turn, so MAX wins in this situation.
+\\
+b)
+\\
+When n=30, the program runs drastically slower than when n=10 or 20.
+\\
+c)
+\\
+\subsubsection*{*.py}
+\begin{lstlisting}
+\end{lstlisting}
+d)
+\\
+\\
+\end{document}
