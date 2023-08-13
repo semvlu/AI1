@@ -1,0 +1,217 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=C,
+  numbers=left,
+  stepnumber=1,    
+  firstnumber=1,
+  numberfirstline=true
+  aboveskip=5mm,
+  belowskip=5mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+
+\title{{\bf Artificial Intelligence 1} \\ Lab 1}%Update the lab (assignment number)
+\author{
+Po-Chun Chi (S5494796)
+\\
+Merlijn Brouwer (S5248949)
+\\
+Learning Group 66
+} %Change the name and fill in the student number and your group
+\date{\today}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\section*{Disclosure}
+
+\paragraph{I have collaborated on the code with:} 
+\paragraph{To develop the code I (we) used the following resources:\\ p77, Artificial Intelligence A Modern Approach, 3e\\ p93, Artificial Intelligence A Modern Approach, 3e
+} % disclose all online or offline resources you have consulted to develop your code
+
+
+
+
+\section*{Exercise 1}
+1.1
+\\
+a)
+\begin{center} % center w.r.t. page
+\begin{tabular}{l|l|l|}
+\cline{2-3}
+                                  & \textbf{A reversi / othello computer}        & \textbf{A robotic lawn mower}             \\ \hline
+\multicolumn{1}{|l|}{Performance} & Number of cheeses of one’s own colour        & Percentage of the grassland been cut \\ \hline
+\multicolumn{1}{|l|}{Environment} & Chess board                                  & Grassland                                 \\ \hline
+\multicolumn{1}{|l|}{Actuators}   & Robotic arms, programs to execute the action & Motor, wheel, blades, RF transmitter      \\ \hline
+\multicolumn{1}{|l|}{Sensors}     & Cameras, file reader                         & Rain sensor, RF sensor                    \\ \hline
+\end{tabular}
+\end{center}
+b)
+\begin{center}
+\begin{tabular}{l|l|l|}
+\cline{2-3}
+                                    & \textbf{A reversi / othello computer} & \textbf{A robotic lawn mower} \\ \hline
+\multicolumn{1}{|l|}{Observable}    & Fully                                 & Partially                     \\ \hline
+\multicolumn{1}{|l|}{Deterministic} & Deterministic                         & Stochastic                    \\ \hline
+\multicolumn{1}{|l|}{Episodic}      & Sequential                            & Episodic                      \\ \hline
+\multicolumn{1}{|l|}{Static}        & Static                                & Dynamic                       \\ \hline
+\multicolumn{1}{|l|}{Discrete}      & Discrete                              & Continuous                    \\ \hline
+\multicolumn{1}{|l|}{Single agent}  & Multi-agent                           & Single agent                  \\ \hline
+\end{tabular}
+\end{center}
+1.2
+\\
+a) 
+\\
+It will cause an infinite loop between square 1 \& 2. Since the DFS is applying the open list version, which does not keep track of visited states in an explored set (a.k.a. closed list). Following the procedure of the for loop, actions will be E, W, E, W….
+\\
+b) 
+\\
+Add an explored set (a.k.a. closed list), and store the explored square in the list, which turns the function into a closed list DFS. 
+\\
+c)
+\\
+1 - E $>$ 2 - N $>$ 6 - W $>$ 5 - N $>$ 9 - N $>$ 13 - E $>$ 14 - S $>$ 10(X)
+\\
+Return to 6
+\\
+6 - E $>$ 7 - S $>$ 3 - E $>$ 4 - N $>$ 8 - N $>$ 12 - W $>$ 11 - N $>$15 
+\\
+d)
+\\
+1 - E $>$ 2 - N $>$ 6 - E $>$ 7 - S $>$ 3 - E $>$ 4 - N $>$ 8 - N $>$ 12 - W $>$ 11 - N $>$ 15
+\\
+e)
+\\
+Yes. BFS explores all the branches instead of only one, so if the solution exists, BFS will always find the solution. 
+\\
+f)
+\\
+1 $->$ 2 $->$ 1 $->$ 6 $->$ 2 $->$ 5 $->$ 2 $->$ 7 $->$ 1 $->$ 6
+\\
+g)
+\\
+Yes. Add an explored set (a.k.a. closed list), and store the explored square in the list, which turns the function into a closed list BFS.
+\\
+h)
+\\
+A closed list version of DFS. First this version of DFS will always find a solution if it exists. Second, it has less space complexity if the worst case exists, which would be , implies the branching factor, and  implies the maximum depth, in comparison to BFS, which its space complexity would be ,  implies the branching factor, and  implies the shallowest depth of the goal node. 
+\\
+
+
+
+\section*{Exercise 2}
+a)
+\\
+No. Because DFS will get stuck in an infinitely repeating path that never reaches the goal
+\\
+b)
+\\
+No. Although BFS does not get stuck in one loop, the search tree includes a lot of infinitely repeating paths, so each time it goes through a layer of the tree, it also needs to put all these redundant steps on the fringe. The fringe will eventually get full. 
+\\
+c)
+\\
+Set the algorithm to a closed list version. Initialise a list called explored\_set, then add the room which has been traveled to the list, so that it will not stuck in a cycle.
+\subsubsection*{maze\_solver.py}
+\begin{lstlisting}
+explored_set = []
+while not fr.is_empty():
+    state = fr.pop()
+    room = state.get_room()
+
+    if room.is_goal():
+        print("solved")
+        fr.print_stats()
+        state.print_path()
+        state.print_actions()
+        print()  # print newline
+        maze.print_maze_with_path(state)
+        return True
+            
+    explored_set.append(room)
+    for d in room.get_connections():
+        new_room, cost = room.make_move(d, state.get_cost())
+        if new_room not in explored_set:
+            new_state = State(new_room, state, cost)
+            fr.push(new_state) 
+\end{lstlisting}
+d)
+\subsubsection*{maze\_solver.py}
+\begin{lstlisting}
+elif algorithm == "UCS":
+    fr = Fringe("PRIORITY")
+
+[...]
+
+if algorithm == "UCS":
+    new_room, cost = room.make_move(d, state.get_cost()) 
+    if new_room not in explored_set:                      
+        new_state = State(new_room, state, cost, cost)    
+        fr.push(new_state)
+\end{lstlisting}
+e)
+\\
+UCS takes into account the total path cost, and the cost for different actions are not the same (for going up is 3, 2 for going down, and 1 for sideways). BFS only finds the path with the least number of steps. The paths are as follows:
+\\BFS: EDSUW
+\\UCS: EESSWNW
+\\
+This difference makes sense, because the total cost of BFS's path is 8 (1 step down, 1 step up, 3 steps horizontally), whereas UCS' path has a cost of 7 (7 horizontal steps). BFS chose the path with the least number of steps, and UCS found the path with the lowest cost.
+\\
+f)
+\subsubsection*{maze\_solver.py}
+\begin{lstlisting}
+
+elif algorithm == "GREEDY":
+    fr = Fringe("PRIORITY")
+
+[...]
+
+elif algorithm == "GREEDY":
+    new_room, cost = room.make_move(d, state.get_cost()) 
+    if new_room not in explored_set:                               
+        new_state = State(new_room, state, cost, new_room.get_heuristic_value())    
+        fr.push(new_state) 
+\end{lstlisting}
+g)
+\subsubsection*{maze\_solver.py}
+\begin{lstlisting}
+elif algorithm == "ASTAR":
+    fr = Fringe("PRIORITY")
+
+[...]
+
+elif algorithm == "ASTAR":
+    new_room, cost = room.make_move(d, state.get_cost()) 
+    if new_room not in explored_set:                              
+        new_state = State(new_room, state, cost, (cost + new_room.get_heuristic_value()))    
+        fr.push(new_state) 
+\end{lstlisting}
+h)
+\\
+The greedy algorithm only takes into account the heuristic value of the room (\emph{h}), while A* also considers the path cost (\emph{f=g+h}). The Greedy algorithm will follow the path that has the lowest heuristic values, but this is not the path that has the lowest total cost. A* does look at this cost and will therefore find the shortest path.
+\\
+i)
+\\
+\\
+\end{document}
