@@ -1,0 +1,272 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=C,
+  numbers=left,
+  stepnumber=1,    
+  firstnumber=1,
+  numberfirstline=true
+  aboveskip=5mm,
+  belowskip=5mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+
+\title{{\bf Artificial Intelligence 1} \\ Lab 3}%Update the lab (assignment number)
+\author{
+Po-Chun Chi (S5494796)
+\\
+Merlijn Brouwer (S5248949)
+\\
+Learning Group 66
+} %Change the name and fill in the student number and your group
+\date{\today}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\section*{Disclosure}
+
+\paragraph{I have collaborated on the code with:} 
+\paragraph{To develop the code I (we) used the following resources:\\ 
+} % disclose all online or offline resources you have consulted to develop your code
+
+
+
+
+\section*{Exercise 1}
+a)
+\\
+Comparing the 2 results, the CSP without node \& arc consistency has to visit 8 states, and evaluate 26 constraints. While the CSP with node consistency \& without arc consistency needs to visit 5 states and evaluate 24 constraints. When using forward checking based on node consistency, we save some unnecessary steps by checking if a particular assignment leads to the violation of any unary constraints.\\
+\\
+b)
+\\
+The CSP with arc consistency \& without node consistency needs to visit 7 states and evaluate 54 constraints. And the CSP with node \& arc consistency needs to visit 4 states and evaluate 42 constraints. Using arc consistency makes sure that no binary constraints are violated, which cuts down the search space considerably. Any situation in which these constraints are violated are pointless to consider, so this propagation technique avoids these redundant steps.\\
+\\
+\section*{Exercise 2}
+a) 
+\subsubsection*{CSP\_solver.py}
+\begin{lstlisting} 
+def mrv_heuristic(self) -> Variable:
+    min = self.unassigned_var()[0]
+    sizeMin = len(self.unassigned_var()[0].domain)
+    for i in self.unassigned_var():
+        if len(i.domain) < sizeMin:
+            min = i   
+    return min
+\end{lstlisting}
+\\
+b) 
+\subsubsection*{CSP\_solver.py}
+\begin{lstlisting} 
+def degree_heuristic(self) -> Variable:
+    max = self.unassigned_var()[0]
+    sizeMax = len(self.unassigned_var()[0].constraints)
+    for i in self.unassigned_var():
+        if len(i.constraints) > sizeMax:
+            max = i   
+    return max
+\end{lstlisting}
+\section*{Exercise 3}
+3.1
+\\
+a)
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+         & Number States visited & Number constraints evaluated \\ \hline
+NC + AC  & 655                   & 82477                        \\ \hline
+MRV + NC & 1085                  & 34218                        \\ \hline
+MRV + AC & 2057                  & 79064                        \\ \hline
+
+\end{tabular}
+\end{center}
+\textit{MRV heuristic}\\
+The minimum remaining values heuristic chooses the variable that has the smallest domain and assigns it a value first. In this problem, all queens have 8 possible locations and thus all variables have the same domain. Therefore, this heuristic will not make a difference in the search path. \\
+\\
+\textit{Degree heuristic}\\
+The degree heuristic chooses which variable to assign a value to, by picking the one that is involved in the highest number of constraints. This will not make a difference in this problem, since all queens are involved in the same number of constraints. \\
+\\
+\textit{Node consistency}\\
+The \textbf{node\_consistency} function includes a for-loop that removes all values from the domain that violate any of the unary constraints. Strictly speaking, there are no unary constraints in the queens problem, since all constraints dictate that two queens cannot attack each other, and are thus binary. However, once all but one variable in a certain constraint have been assigned a value, this constraint is interpreted as unary and thus keeping the problem node consistent will be effective later on in the solving process.\\
+\\
+\textit{Arc consistency}\\
+Forward checking based on arc consistency makes sure that no binary constraints are violated. Since the constraints in the queens problem each involve 2 queens, this propagation technique should be helpful. If any positions in a queen's domain will cause conflict with other queens, the position will be removed from the domain. Avoiding these redundant positions makes the algorithm more efficient. \\
+\\
+\textit{Combinations}\\
+Although MRV will not work in isolation for this particular problem for reasons discussed earlier, it will be helpful in combination with the \textbf{node\_consistency} function. As more queens get placed on the board, there will be more conflicts to avoid and thus less legal values for certain queens. Later on in the search, we might reach a situation where only one queen in certain constraints is left unassigned, and in that case the constraint will be treated as unary. The node-consistency function will remove these illegal values from the variables' domains, and probably their domains won't all be the same size anymore. Thus, the MRV heuristic will make a difference at that point. This is also reflected in the results we obtained: 1085 visited states and 34218 constraints evaluated. Alternatively, we can combine MRV with arc consistency. Although we would expect this to work rather well since there are many binary constraints, this does not actually reduce the number of states: it still visits 2057 of them, the same as it would without any heuristics or constraint propagation. To narrow the search space down as much as possible, we can combine node consistency with arc consistency. This makes sure that no queens are ever put on illegal positions, even when many of them have already been assigned a value. This is indeed a very effective combination: only 655 states are visited before a solution is found. \\
+\\
+b)
+\\
+The shuffle function makes the order in the list \textit{variables} random prioritised, which is different from the original one which is ordered from 0 to 7. Since solving the problem beginning from the 0th column involves less constraints to other queens in the diagonal position, this is the reason why when the order in the list \textit{variables} is changed, the results is therefore changed.
+\\
+It does effect the best possible heuristics. Since some new constraints are involved in each sub-problem in comparison to solve the problem with the original order, it also effects the best possible heuristics.\\
+\\
+3.2
+\\
+a)
+\\
+The results applying different heuristics / propagation techniques:
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+         & Number States visited & Number constraints evaluated \\ \hline
+None     & 321                   & 2250                         \\ \hline
+MRV      & 321                   & 2250                         \\ \hline
+DEG      & 65                    & 368                          \\ \hline
+NC       & 136                   & 951                          \\ \hline
+AC       & 103                   & 5425                         \\ \hline
+MRV + NC & 26                    & 338                          \\ \hline
+MRV + AC & 103                   & 5425                         \\ \hline
+DEG + NC & 35                    & 363                          \\ \hline
+DEG + AC & 27                    & 539                          \\ \hline
+NC + AC  & 51                    & 722                          \\ \hline
+\end{tabular}
+\end{center}
+\textit{MRV heuristic}\\
+This heuristic is not helpful in isolation, because all variables have the same domain size: all bottles have 4 possible potions in them. There is no specific variable that the heuristic will pick out and assign a value. We can see this in the data as well: running the algorithm with or without MRV gives the same result: 321 states visited and 2250 constraints evaluated. \\
+\\
+\textit{Degree heuristic}\\
+The degree heuristic should make the algorithm more efficient, since not all variables are involved in the same number of constraints. \\
+\\
+\textit{Node consistency}\\
+Since this problem does contain several unary constraints, this propagation technique will remove some options from the domains of the variables involved in these constraints, and thus it should make the search space smaller. \\
+\\
+\textit{Arc consistency}\\
+This propagation technique will take into account all the constraints that involve multiple variables and make sure they are not violated. In this problem, there are multiple such constraints, and so this function helps to avoid evaluating redundant options. \\
+\\
+\textit{Combinations}\\
+Although MRV will not work in isolation for this particular problem, it will be helpful if we also implement the node\_consistency function. If we make the variables node-consistent, their domains won't all be the same size anymore, and thus the MRV heuristic will be effective in this case. The results in the table seem to support this as well: MRV in combination with node consistency cuts the number of visited states down from 321 to 26 (over a 90\% decrease) and the number of evaluated constraints is now 328, where the default is 2250. Another combination of techniques that might be effective is using both node and arc consistency. This makes sure that the search space is minimized as much as possible, exploiting all the information that is contained in the given constraints. Using both these propagation techniques brings the number of visited states down to 51. Finally, combining the degree heuristic with arc consistency forward-checking will make sure that we use the constraints as a heuristic, as well as evaluate them to minimize the search space. Since there are more binary constraints than unary ones, using arc consistency will likely be most effective. And indeed, the algorithm only evaluates 27 states with this combination of functions.\\
+\\
+b)
+\\
+These constraints don't say anything about what any variable should or should not have as a value, nor do they specify any illegal relations between variables. In other words, they are neither unary nor binary (or any n-ary) constraints. They don't limit the value of any set of variables, but only limit the number of variables that can have a particular value. Therefore, these constraints will not be evaluated by either the node consistency or arc consistency function. It also doesn't make a difference for the degree heuristic, since all variables are involved in all these constraints. This means that the solver is not exploiting all information that is available, and thus is not as efficient as it could be. By not letting the number of variables that have a particular value exceed the amount specified in the constraints, the search space could be minimized even more. 
+\\
+\section*{Exercise 4}
+4.1
+\\
+a)
+\\
+There are 2 solutions. The first one is [3,3,4,2,1] (in the format [A,B,C,D,E]), the second one is [4,4,2,3,1].\\
+\\
+b)
+\\
+The results applying different heuristics / propagation techniques:
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+         & Number States visited & Number constraints evaluated \\ \hline
+None     & 53                    & 297                          \\ \hline
+MRV      & 53                    & 297                          \\ \hline
+DEG      & 37                    & 211                          \\ \hline
+NC       & 21                    & 237                          \\ \hline
+AC       & 15                    & 182                          \\ \hline
+MRV + NC & 14                    & 160                          \\ \hline
+MRV + AC & 19                    & 202                          \\ \hline
+DEG + NC & 11                    & 103                          \\ \hline
+DEG + AC & 11                    & 164                          \\ \hline
+NC + AC  & 11                    & 209                          \\ \hline
+\end{tabular}
+\end{center}
+\textit{MRV heuristic}\\
+The MRV heuristic by itself would not help, because every variable has the same domain.\\
+\\
+\textit{Degree heuristic}\\
+The degree heuristic is helpful, since there are many constraints in this problem. Not all variables are involved in the same number of variables, so this is a useful heuristic to apply.\\
+\\
+\textit{Node Consistency}\\
+We do expect this propagation technique to be effective, since multiple constraints will be treated as unary once all variables involved except one have been assigned a value. Therefore, applying this variation of forward checking will avoid illegal assignments. \\
+\\
+\textit{Arc Consistency}\\
+The arc consistency helps a lot, since all the constraints are binary constraints. Making sure all inequalities are satisfied will lead the algorithm to a solution faster. \\
+\\
+\textit{Combinations}\\
+Although MRV will not work in isolation for this particular problem, it will be helpful if we also implement the node\_consistency function. If we make the variables node-consistent, their domains won't all be the same size anymore, and thus the MRV heuristic will be effective in this case. The results in the table seem to support this as well: MRV in combination with node consistency leads to only 14 states being visited. We can also combine node consistency with the degree heuristic. This way, we choose the variable that has to satisfy the highest number of inequalities while also making sure no constraints are violated. This seems to be a rather combination: only 11 states are visited and 103 constraints evaluated. To narrow the search space down as much as possible, we can combine node consistency with arc consistency. This makes sure that no variables are ever assigned a value that leads to conflict. This combination also cuts the number of visited states down to 11. \\
+\\
+4.2
+\\
+a)
+\\
+We created a file for the "UN + UN + NEUF = ONZE" cryptarithmetic puzzle. We initialise the variables \& constraints as follows (the \textbf{all\_diff} function was also used to make sure all variables have a different value, but is not shown here):
+\subsubsection*{4.2cryptarithmetic.py}
+\begin{lstlisting} 
+variables = [
+    Variable("E", domain= [0,1,2,3,4,5,6,7,8,9]),
+    Variable("F", domain= [0,1,2,3,4,5,6,7,8,9]),
+    Variable("N", domain= [1,2,3,4,5,6,7,8,9]),
+    Variable("O", domain= [1,2,3,4,5,6,7,8,9]),
+    Variable("U", domain= [1,2,3,4,5,6,7,8,9]),
+    Variable("Z", domain= [0,1,2,3,4,5,6,7,8,9]),
+    Variable("C1", domain= [0,1,2]),
+    Variable("C2", domain= [0,1,2]),
+    Variable("C3", domain= [0,1,2])
+]
+
+constraints = [
+    Constraint("2 * N + F == E + 10 * C1"),
+    Constraint("C1 + 3 * U == Z + 10 * C2"),
+    Constraint("C2 + E == N + 10 * C3"),
+    Constraint("C3 + N == O")
+]
+\end{lstlisting}
+And the final answer would be:
+E = 9; F = 7; N = 1; O = 2; U = 8; Z = 4; C1 = 0; C2 = 2; C3 = 1.\\
+\\
+b) 
+\\
+The results applying different heuristics / propagation techniques:
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+         & Number States visited & Number constraints evaluated \\ \hline
+None     & 143421                & 1340131                      \\ \hline
+MRV      & 3196                  & 32263                        \\ \hline
+DEG      & 143411                & 1340121                      \\ \hline
+NC       & 3026                  & 35631                        \\ \hline
+AC       & 76                    & 10552                        \\ \hline
+NC + AC  & 62                    & 25102                        \\ \hline
+MRV + NC & 395                   & 21295                        \\ \hline
+DEG + NC & 3016                  & 35325                        \\ \hline
+MRV + AC & 546                   & 37086                        \\ \hline
+DEG + AC & 50                    & 4971                         \\ \hline
+\end{tabular}
+\end{center}
+\textit{MRV heuristic}\\
+The minimum remaining values heuristic should work for this cryptarithmetic problem, since not all variables have the same domain size: we excluded 0 from the domain of letters in leading positions, and used auxiliary variables for carry digits, which have a domain of {0, 1, 2} (the additions consist of 3 singe-digit numbers at most, so the sums will never exceed 29). The other variables have a domain that includes all numbers from 0 to 9.\\
+\\
+\textit{Degree heuristic}\\
+This heuristic should also make a difference, since not all variables are involved in the same number of constraints. For example, the "N" variable is involved in 3 columns, whereas "Z: occurs only in one.\\
+\\
+\textit{Node consistency}\\
+We do expect this propagation technique to be effective, since multiple constraints will be treated as unary once all variables involved except one have been assigned a value (especially the constraints corresponding to the additions). Therefore, applying this variation of forward checking will avoid illegal assignments. \\
+\\
+\textit{Arc consistency}\\
+We expect arc consistency to make the algorithm more efficient, since there are many constraints that involve two variables (especially since we implemented the \textbf{all\_diff} function). By making sure none of these constraints are violated, the algorithm will solve the problem faster.\\
+\\
+\textit{Combinations}\\
+We could combine MRV and arc consistency in order to make the search faster. This way, we intentionally pick a variable to assign a value to and check whether none of the binary constraints are violated. This combination is indeed rather effective, leading to only 546 states being visited. Combining node consistency with MRV has a similar effect: it gets to only 395 states.  Another possible combination is the degree heuristic together with arc consistency. We again pick out a variable which we will assign a value to, while also checking the constraints. The results in the table show that is the most effective combination: only 50 states were visited before a solution was found. \\
+\\
+
+
+
+
+\end{document}
